@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>두산베어스</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-family: sans-serif;
+      background-color: rgb(7, 8, 31);
+    }
+
+    .video-section {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+    }
+    .video-section video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: center center;
+    }
+
+    
+    .scroll-combo-wrapper {
+      position: relative;
+      min-height: 180vh;
+      padding: 150px 0;
+    }
+
+    .h1-wrapper {
+      text-align: center;
+      position: sticky;
+      top: 100px;
+      z-index: 10;
+    }
+
+    .h1-wrapper h1,
+    .h1-wrapper h2,
+    .h1-wrapper h3 {
+      margin: 0;
+      font-size: 4rem;
+      line-height: 1.2;
+    }
+
+
+    .content-section {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 80px;
+      padding: 200px 40px;
+    }
+
+    .slide-set {
+      position: absolute;
+      top:auto;
+      left: 5vw;
+      width: 40vw;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0px;
+      border-radius: 10px;
+      opacity: 0;
+      transform: translateX(-200px);
+      transition: opacity 0.6s ease, transform 1s ease;
+      color: white;
+      gap: 80px;
+      pointer-events: none;
+      background: none;
+      box-shadow: none;
+    }
+
+    .slide-set.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .slide-set img {
+      width: 100%;
+      height: auto;
+      border-radius:0px;
+      display: block;
+      margin-top: 40px;
+    }
+
+    .slide-set p {
+      margin-top:10px;
+      font-size: 1rem;
+    }
+
+    .set1 { top: 550px; }
+
+    .set2 { top: 1050px; } 
+    .set3 { top: 1550px; } /* set1보다 더 아래로 위치 조정 */
+.scroll-combo-wrapper {
+  min-height: 220vh; /* 더 늘리면 set2와 겹치지 않게 여유가 생겨 */
+}
+
+
+   /* 오른쪽에서 들어오는 타임라인 */
+   .timeline {
+      width: 600px;
+      position: relative;
+      padding-left: 40px;
+      opacity: 0;
+      transform: translateX(100px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      margin-left: 1000px; 
+    }
+
+    .timeline.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background-color: #fff;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 120px;
+      opacity: 0;
+      transform: translateX(100px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .timeline-item.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -12px;
+      top: 6px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 3px solid rgb(7, 8, 31);
+    }
+
+    .timeline-item img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .timeline-content {
+      margin-left: 20px;
+    }
+
+    @media (max-width: 1000px) {
+      .content-section {
+        flex-direction: column;
+        align-items: center;
+      }
+      .timeline, .slide-set {
+        width: 90%;
+        transform: none;
+      }
+    }
+
+.click-hint {
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+}
+.click-hint2 {
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  color: rgba(0, 0, 0, 0.7);
+  text-align: center;
+}
+
+
+
+
+
+    
+    .image-scroll-section {
+      height:50vh; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: scroll;
+      scroll-snap-type: x mandatory;
+    }
+
+    .image-scroll-section::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scroll-track {
+      display: flex;
+      gap: 5vw;
+      padding: 0;
+    }
+
+    .scroll-image {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+      transition: transform 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .scroll-image img {
+  width: 100%;
+  max-width: 250px;
+  transition: transform 0.3s;
+  display: block;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.scroll-image {
+  margin-top: 0;
+}
+
+
+
+
+    .spacer {
+      flex: 0 0 calc(50vw - 150px); 
+      pointer-events: none;
+    }
+
+    .fixed-logo {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: auto;
+      z-index: 1000;
+    }
+
+    
+
+
+    .uniform-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: black;
+  text-align: center;
+  background: none;
+  background-color: transparent;
+}
+
+
+
+    .uniform-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+    .uniform-section {
+      min-height: 100vh;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 100px 20px;
+      box-sizing: border-box;
+      z-index: 1;
+      position: relative;
+    }
+
+    .uniform-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      gap: 40px;
+    }
+
+    .uniform-thumbnails {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 20px;
+    }
+
+    .uniform-thumb {
+      width: 80px;
+      height: auto;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s, border 0.2s;
+    }
+
+    .uniform-thumb:hover {
+      transform: scale(1.1);
+      border: 2px solid #555;
+    }
+
+    .patch-list {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      max-height: 600px;
+    }
+
+    .patch {
+      width: auto;
+      max-height: 80px;
+      object-fit: contain;
+      transition: transform 0.3s;
+      cursor: grab;
+    }
+
+    .patch:hover {
+      transform: scale(1.5);
+    }
+    
+
+
+.patch-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  pointer-events: none; /* 드래그 시 글자는 무시되도록 */
+  text-shadow: 0 0 5px black;
+  
+}
+
+    .uniform-dropzone {
+      position: relative;
+      width: 90%;
+      max-width: 900px;
+      height: auto;
+    }
+
+    .uniform-dropzone img {
+      width: 100%;
+      height: auto;
+      display: block;
+      pointer-events: none;
+    }
+
+    .dropped-patch {
+      position: absolute;
+      width: 70px;
+      height: auto;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      user-select: none;
+      background-color: transparent !important;
+      border: none !important;
+      outline: none !important;
+      image-rendering: auto;
+    }
+
+    .thumbnail-under {
+      margin-top: 40px;
+    }
+
+    body {
+      color: white;
+      transition: color 0.3s ease;
+    }
+    body.black-text {
+      color: black;
+    }
+
+    .gallery-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: black;
+  text-align: center;
+  background: none;
+  background-color: transparent;
+}
+
+    .gallery-images {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+ 
+  margin-top: 0px;
+  overflow: visible; /* hover 시 확대된 이미지 잘리지 않도록 */
+  flex-wrap: wrap;
+}
+
+.gallery-photo {
+  width: 200px;
+  height: auto;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  object-fit: contain;
+  z-index: 1;
+}
+
+.gallery-photo:hover {
+  transform: scale(2);
+  z-index: 10;
+  position: relative;
+}
+
+
+.footer-box {
+  background-color: rgb(7, 8, 31);
+; /* 남색 */
+  color: white;
+  height: 3cm;
+  width: 100vw;
+  padding: 0;
+  font-size: 0.5rem;
+  line-height: 1.0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  white-space: pre-line;
+  
+  
+  
+   /* 줄바꿈 유지 */
+}
+.footer-box p {
+  margin: 0;
+}
+
+.footer-left {
+  max-width: 60%;
+}
+
+.footer-right {
+  max-width: 60%;
+  text-align: right;
+  padding-left: 83vW;
+}
+
+
+
+  </style>
+</head>
+<body>
+
+  <div class="menu-toggle" id="menuToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <img src="엠블럼.png" alt="로고" class="fixed-logo" />
+
+
+  <div class="video-section">
+    <video autoplay muted loop playsinline>
+      <source src="제목 없음.MP4" type="video/mp4" />
+    </video>
+  </div>
+
+  
+  <!-- 스크롤 따라 올라가고 다시 내려오며 등장하는 묶음 -->
+  <div class="scroll-combo-wrapper">
+
+    
+    <div class="h1-wrapper">
+      <h1>YOU GOT THIS</h1>
+      <h3>X</h3>
+      <h2>MIRACLE</h2>
+    </div>
+
+    <div class="content-section">
+    <div class="slide-set set1">
+      <img src="you.png" alt="You Got This 1" />
+      <p>널 믿어(You Got This)’ 캠페인은 가장 가까운 존재가 보내는 응원과 지지를 통해 어려운 순간에도 혼자가 아님을 믿고 긍정적으로 나아가자는 메시지를 전달한다. 두산베어스와 함께한 이번 캠페인에서는 선수들과 ‘최강 10번 타자’인 두산베어스 팬들의 강력한 유대감을 생동감 넘치는 비주얼로 표현했다</p>
+    </div>
+
+    <div class="slide-set set2">
+      <img src="got.png" alt="Miracle 1" />
+      <p>아디다스는 두산베어스와 함께한 ‘널 믿어(You Got This)’ 캠페인을 통해 선수와 팬이 하나로 연결되는 특별한 경험을 선사하고자 했다면서 스포츠의 진정한 가치는 단순한 승패가 아니라 서로를 믿고 함께 나아가는 데 있으며, 앞으로도 다양한 파트너십 활동을 통해 긍정적인 서포터의 가치를 전달할 것이라고 밝혔다..</p>
+    </div>
+
+    <div class="slide-set set3">
+      <img src="this.png" alt="Miracle 1" />
+      <p> 이번 캠페인은 선수들에게 가장 가까운 존재인 팬이 보내는 응원과 지지를 통해 어려운 순간에도 혼자가 아님을 믿고 긍정적으로 나아가자는 메시지를 담았다.  팬들이 두산베어스의 응원가를 목청껏 부르며 선수와 팬이 하나로 연결되는 특별한 경험을 연출했다.선수들에게 가장 큰 서포터인 팬들의 지지와 응원으로 경기 전 압박감을 이겨내는 선수들의 모습을 통해 ‘긍정적인 서포터의 중요성’을 강조한다. 
+        또한 그라운드 안에서는 감동을 전하고, 밖에서는 낮은 자세로 팬들에게 다가서는 두산베어스의 ‘팬 퍼스트’ 정신도 나타내고 있다</p>
+    </div>
+   
+    <!-- 오른쪽: 타임라인 -->
+ <div class="timeline">
+  <div class="timeline-item">
+    
+    <div class="timeline-content">
+      <h3>2001년 - 'miracle'의 시작</h3>
+      <p>정규시즌 3위로 포스트시즌에 진출한 두산은 준플레이오프와 플레이오프를 거쳐 한국시리즈 우승을 차지했다.
+        당시 두산은 마운드 전력이 약화된 상태에서도 우승을 일궈내며 "미라클 두산"이라는 별칭을 얻었다..</p>
+    </div>
+  </div>
+  <div class="timeline-item">
+    
+    <div class="timeline-content">
+      <h3>2015년</h3>
+      <p>정규시즌 3위로 포스트시즌에 진출한 두산은 넥센 히어로즈, NC 다이노스, 삼성 라이온즈를 차례로 꺾고 한국시리즈 우승을 차지했다.
+        특히 한국시리즈 5차전에서 삼성 라이온즈를 13-2로 대파하며 14년 만에 정상에 올랐다..</p>
+    </div>
+  </div>
+  <div class="timeline-item">
+   
+    <div class="timeline-content">
+      <h3>2017년</h3>
+      <p>2017년 두산 베어스는 시즌 중반까지 5위권에 머물렀으나, 후반기에 대역전극을 펼치며 정규시즌 2위로 마감했다. 이러한 극적인 반전은 "미라클 두산"이라는 별칭을 더욱 공고히 하는 계기가 되었다.</p>
+    </div>
+  </div>
+  <div class="timeline-item">
+   
+    <div class="timeline-content">
+      <h3>2019년</h3>
+      <p>2019년 10월 1일: 정규시즌 마지막 경기에서 두산은 NC 다이노스를 상대로 6-5로 승리하며 SK 와이번스와 동률을 이루었다. 그 이후
+        상대 전적에서 앞선 두산은 정규시즌 1위를 확정지었다.</p>
+    </div>
+  </div>
+  <div class="timeline-item">
+    
+    <div class="timeline-content">
+      <h3>2021년</h3>
+      <p>정규시즌 4위로 포스트시즌에 진출한 두산은 와일드카드 결정전부터 플레이오프까지 모두 승리하며 한국시리즈에 진출했다.
+        이는 KBO 리그 최초로 와일드카드 팀이 한국시리즈에 진출한 사례로 기록되었다.</p>
+    </div>
+  </div>
+  
+  <div class="timeline-item">
+    
+    <div class="timeline-content">
+      <h3>2025년 </h3>
+      <p>아디다스는 "스포츠를 통해 세상을 바꿀 수 있다는 믿음"이라는 철학을 갖고 있다. 이러한 그들의 철학이 두산 베어스의 '미라클', '허슬'과 만나 시너지 효과를 내주길 기대하고 있다</p>
+    </div>
+  </div>
+  <div class="timeline-item">
+    
+    <div class="timeline-content">
+      <h3>hustle</h3>
+      <p>miracle과 함께 두산을 나타내는 단어이다. 2007년 당시 선수들은 빠른 발을 이용한 도루로 상대 팀을 압박하며 경기를 펼쳤고, 팬들은 이러한 선수들의 열정을 응원하기 위해 '허슬두'를 외쳤다. 이 구호는 두산 베어스의 정신을 상징하는 중요한 단어로 자리 잡았다.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+  </div>
+  
+  
+ 
+
+  <div id="logoDescription" style="
+  position: fixed;
+  bottom: 10vh;
+  width: 100%;
+  text-align: center;
+  font-size: 2rem;
+  opacity: 0;
+  transition: opacity 0.3s, font-size 0.3s;
+  pointer-events: none;
+  z-index: 999;
+  color: black;
+  font-weight: bold;
+"></div>
+
+<div style="text-align: center; font-size: 2rem; font-weight: bold; margin-bottom: 0; color: white; line-height: 1;">
+    EMBLEM
+    <span class="click-hint">엠블럼은 끈끈한 팀 플레이가 이뤄지는 내야 다이아몬드 위에서 구단과 연고지 서울,<br>
+       그리고 ‘최강 10번 타자’가 하나로 묶인 ‘원 팀(One Team) 베어스’를 표현했다. <br>
+       로고와 심볼 역시 프렌들리한 서체로 탈바꿈하여 구단의 팬 친화적 지향점을 담아냈다.</span>
+  </div>
+  
+
+  
+
+  
+
+  <div class="image-scroll-section" id="imageScroll">
+    <div class="scroll-track">
+        <div class="spacer"></div>
+      <div class="scroll-image"><img src="로고1.png" alt="이미지1" data-desc="두산베어스의 상징, 로고 1입니다."></div>
+      <div class="scroll-image"><img src="로고2.png" alt="이미지2" data-desc="두산베어스의 상징, 로고 1입니다."></div>
+      <div class="scroll-image"><img src="로고3.png" alt="이미지3" data-desc="두산베어스의 상징, 로고 1입니다."></div>
+      
+      <div class="spacer"></div>
+    </div>
+  </div>
+
+  <div style="text-align: center; font-size: 2rem; font-weight: bold; margin-bottom: 0; color: white; line-height: 1;">
+    MASCOT
+    <span class="click-hint">팬들의 뜨거운 사랑을 받고 있는 마스코트 ‘철웅이’도 BI 교체에 맞춰 새단장을 했다.</span>
+  </div>
+  
+  <div class="image-scroll-section" id="imageScroll2">
+    
+    <div class="scroll-track">
+        <div class="spacer"></div>
+      <div class="scroll-image"><img src="철웅1.png" alt="이미지5"></div>
+      <div class="scroll-image"><img src="철웅2.png" alt="이미지6"></div>
+      <div class="scroll-image"><img src="철웅4.png" alt="이미지8"></div>
+      <div class="spacer"></div>
+    </div>
+<!-- 철웅이 이미지 스크롤 끝 -->
+</div>
+</div>
+
+<!-- 공간 분리용 spacer -->
+<div style="height: 100px; background: white;"></div>
+
+
+
+  
+<div class="uniform-section">
+    <uniform-title class="uniform-title">UNIFORM
+      <span class="click-hint2">
+        아디다스와 함께 만든 유니폼의 키워드는 ‘경기력 향상’이다. <br>
+        원단과 엠블럼 마킹 모두 경량화에 초점을 맞췄다. <br>
+        아디다스는 기능성 소재 원단에다 승화전사 마킹 기술을 채택해 경기력 향상을 꾀했다. <br>
+        또한 유니폼 옆면에 아디다스의 삼선 줄무늬를 새겼다.</span>
+    </uniform-title>
+    <div class="uniform-container">
+        <!-- 유니폼 이미지 + 썸네일 묶음 -->
+        <div class="uniform-main">
+          <div class="uniform-dropzone" id="uniformDropZone">
+            <img src="유니폼 1.png" alt="두산 유니폼" id="uniformImage" class="tttt" />
+          </div>
+          <div class="uniform-thumbnails thumbnail-under">
+            <img src="유니폼 1.png" class="uniform-thumb" data-src="유니폼 1.png" />
+            <img src="유니폼 2.png" class="uniform-thumb" data-src="유니폼 2.png" />
+          </div>
+        </div>
+       
+        <!-- 와펜 리스트는 오른쪽에 유지 -->
+        <div class="patch-list">
+          <img src="와펜1.png" class="patch" draggable="true" />
+          <img src="와펜2.png" class="patch" draggable="true" />
+          <img src="와펜3.png" class="patch" draggable="true" />
+          <img src="와펜4.png" class="patch" draggable="true" />
+          <img src="와펜5.png" class="patch" draggable="true" />
+        </div>
+      </div>
+
+      <div style="height: 100px; background: white;"></div>
+      
+      <gallery-title class="gallery-title">OTHER
+        <div style="height: 100px; background: white;"></div>
+        <span class="click-hint2">
+         </span>
+      </gallery-title>
+      <div class="gallery-images">
+        <img src="굿즈1.png" class="gallery-photo" alt="추가 사진 1" />
+        <img src="굿즈2.png" class="gallery-photo" alt="추가 사진 2" />
+        <img src="굿즈3.png" class="gallery-photo" alt="추가 사진 3" />
+        <img src="굿즈4.png" class="gallery-photo" alt="추가 사진 4" />
+        
+      </div>
+      <!-- gallery 이미지 아래에 -->
+      
+      
+      
+  
+</div>
+<div class="footer-box">
+  <div class="footer-left">
+    대표이사 : 고영섭<br>
+    주소: 서울특별시 송파구 올림픽로 25 잠실야구장내 두산베어스<br>
+    사업자등록번호 : 107-81-13241<br>
+    통신판매허가번호 : 서울시 송파구청 제 1775호<br>
+    COPYRIGHTⓒ 2025 DOOSAN BEARS INC. ALL RIGHTS RESERVED
+  </div>
+  <div class="footer-right">
+    이용약관 <br>
+    개인정보 처리방식 <br>
+    QNA <br>
+  </div>
+</div>
+  
+  </div>
+
+  <script>
+   
+    const fixedLogo = document.querySelector('.fixed-logo');
+    const contentSection = document.querySelector('.content-section');
+  
+ 
+    // 슬라이드 세트 및 타임라인 전체 등장
+    const slideSets = document.querySelectorAll('.slide-set');
+    const timeline = document.querySelector('.timeline');
+
+    window.addEventListener('scroll', () => {
+      const windowHeight = window.innerHeight;
+      const triggerY = document.querySelector('.content-section').offsetTop;
+
+      if (window.scrollY + windowHeight > triggerY + 100) {
+        slideSets.forEach(set => set.classList.add('visible'));
+        timeline.classList.add('visible');
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+  const windowHeight = window.innerHeight;
+
+  slideSets.forEach(set => {
+    const setTop = set.getBoundingClientRect().top;
+
+    
+
+    // 슬라이드가 보일 위치에 들어오면 등장, 아니면 사라짐
+    if (setTop < windowHeight * 0.8) {
+      set.classList.add('visible');
+    } else {
+      set.classList.remove('visible');
+    }
+  });
+});
+  
+
+window.addEventListener('scroll', () => {
+  const windowHeight = window.innerHeight;
+  timelineItems.forEach((item, i) => {
+    const rect = item.getBoundingClientRect();
+    if (rect.top < windowHeight * 0.8 && rect.bottom > 0) {
+      setTimeout(() => {
+        item.classList.add('visible');
+      }, i * 200);
+    } else {
+      item.classList.remove('visible');
+    }
+  });
+});
+
+
+    // 타임라인 아이템 순차 등장
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    window.addEventListener('scroll', () => {
+      const windowHeight = window.innerHeight;
+      timelineItems.forEach((item, i) => {
+        const rect = item.getBoundingClientRect();
+        if (rect.top < windowHeight * 0.8) {
+          setTimeout(() => {
+            item.classList.add('visible');
+          }, i * 200);
+        }
+      });
+    });
+
+
+    
+    const scrollContainer = document.getElementById('imageScroll');
+    scrollContainer.addEventListener('scroll', () => {
+      const center = scrollContainer.scrollLeft + scrollContainer.offsetWidth / 2;
+      document.querySelectorAll('#imageScroll .scroll-image').forEach((el) => {
+        const boxCenter = el.offsetLeft + el.offsetWidth / 2;
+        const distance = Math.abs(center - boxCenter);
+        const scale = Math.max(1.2 - distance / scrollContainer.offsetWidth, 0.6);
+        el.querySelector('img').style.transform = `scale(${scale})`;
+      });
+    });
+    window.addEventListener('load', () => {
+  const scrollContainer = document.getElementById('imageScroll');
+  const secondImage = scrollContainer.querySelectorAll('.scroll-image')[1];
+  if (secondImage) {
+    const containerCenter = scrollContainer.offsetWidth / 2;
+    const imageCenter = secondImage.offsetLeft + secondImage.offsetWidth / 2;
+    const scrollTo = imageCenter - containerCenter;
+    scrollContainer.scrollLeft = scrollTo;
+  }
+});
+
+    
+  
+    const scrollContainer2 = document.getElementById('imageScroll2');
+    scrollContainer2.addEventListener('scroll', () => {
+      const center = scrollContainer2.scrollLeft + scrollContainer2.offsetWidth / 2;
+      document.querySelectorAll('#imageScroll2 .scroll-image').forEach((el) => {
+        const boxCenter = el.offsetLeft + el.offsetWidth / 2;
+        const distance = Math.abs(center - boxCenter);
+        const scale = Math.max(1.2 - distance / scrollContainer2.offsetWidth, 0.6);
+        el.querySelector('img').style.transform = `scale(${scale})`;
+      });
+    });
+    
+    window.addEventListener('load', () => {
+  const scrollContainer2 = document.getElementById('imageScroll2');
+  const secondImage = scrollContainer2.querySelectorAll('.scroll-image')[1];
+  if (secondImage) {
+    const containerCenter = scrollContainer2.offsetWidth / 2;
+    const imageCenter = secondImage.offsetLeft + secondImage.offsetWidth / 2;
+    const scrollTo = imageCenter - containerCenter;
+    scrollContainer2.scrollLeft = scrollTo;
+  }
+});
+
+    
+  
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const contentTop = contentSection.offsetTop;
+  
+      if (scrollY < contentTop - 200) {
+        const newSize = Math.max(80, 150 - scrollY * 0.1); // 50px에서 시작, 최소 30px까지 줄어듦
+        fixedLogo.style.width = `${newSize}px`;
+      } else {
+        fixedLogo.style.width = '80px'; // content-section에 닿으면 고정된 크기 유지
+      }
+    });
+  
+    window.addEventListener('load', () => {
+      scrollContainer.dispatchEvent(new Event('scroll'));
+      scrollContainer2.dispatchEvent(new Event('scroll'));
+    });
+
+
+
+    const uniformDropZone = document.getElementById('uniformDropZone');
+let draggedPatch = null;
+
+document.querySelectorAll('.patch').forEach(patch => {
+  patch.addEventListener('dragstart', (e) => {
+    draggedPatch = e.target.cloneNode(true);
+  });
+});
+
+uniformDropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+});
+
+uniformDropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (draggedPatch) {
+    const rect = uniformDropZone.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    draggedPatch.classList.add('dropped-patch');
+    draggedPatch.style.left = `${x}px`;
+    draggedPatch.style.top = `${y}px`;
+
+    uniformDropZone.appendChild(draggedPatch);
+    draggedPatch = null;
+  }
+});
+
+document.querySelectorAll('.uniform-thumb').forEach(thumb => {
+  thumb.addEventListener('click', () => {
+    const newSrc = thumb.getAttribute('data-src');
+    const uniformImage = document.getElementById('uniformImage');
+    uniformImage.src = newSrc;
+  });
+});
+
+
+const videoSection = document.querySelector('.video-section video');
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const maxScroll = 300; // 줄어들기 시작할 스크롤 기준
+  const minScale = 0.8; // 최소 크기 비율
+
+  // scale은 1에서 시작해서 maxScroll 이후 minScale까지 줄어듭니다.
+  let scale = 1 - (scrollY / maxScroll) * (1 - minScale);
+  scale = Math.max(scale, minScale); // 최소 scale 제한
+
+  videoSection.style.transform = `scale(${scale})`;
+  videoSection.style.transition = 'transform 0.1s ease-out';
+});
+
+const body = document.body;
+  const uniformSection = document.querySelector('.uniform-section');
+
+  // 시작 색과 끝 색
+  const startColor = [7, 8, 31];       // 어두운 남색
+  const endColor = [255, 255, 255];    // 흰색
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const uniformTop = uniformSection.offsetTop;
+
+    // 유니폼 섹션 진입 400px 전부터 색 변화 시작
+    const fadeStart = uniformTop - windowHeight - 400;
+    const fadeEnd = uniformTop;
+
+    let progress = 0;
+    if (scrollY < fadeStart) {
+      progress = 0;
+    } else if (scrollY > fadeEnd) {
+      progress = 1;
+    } else {
+      progress = (scrollY - fadeStart) / (fadeEnd - fadeStart);
+    }
+
+    // 색상 보간
+    const currentColor = startColor.map((start, i) => {
+      const end = endColor[i];
+      return Math.round(start + (end - start) * progress);
+    });
+
+    body.style.backgroundColor = `rgb(${currentColor[0]}, ${currentColor[1]}, ${currentColor[2]})`;
+  });
+
+  
+
+  document.querySelectorAll('.uniform-thumb').forEach(thumb => {
+  thumb.addEventListener('click', () => {
+    const newSrc = thumb.getAttribute('data-src');
+    const uniformImage = document.getElementById('uniformImage');
+    uniformImage.src = newSrc;
+
+    // ✅ 기존 와펜 제거
+    document.querySelectorAll('.dropped-patch').forEach(patch => patch.remove());
+  });
+});
+
+
+  </script>
+
+  
+  
+
+</body>
+</html>
